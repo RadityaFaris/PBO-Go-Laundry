@@ -1,13 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="model.Akun" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page import="model.ServiceLaundry" %>
+<%@ page import="java.util.List" %>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Layanan - Go-Laundry</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/style.css">
 </head>
 <body>
 
@@ -21,43 +22,50 @@
         </div>
     </div>
 
-    <%-- Daftar Service --%>
+    <%-- Daftar Service tanpa JSTL --%>
     <div class="service-grid" style="margin-bottom:2rem;">
-        <c:choose>
-            <c:when test="${empty services}">
-                <div class="alert alert-info">Belum ada layanan tersedia.</div>
-            </c:when>
-            <c:otherwise>
-                <c:forEach var="s" items="${services}">
-                    <div class="service-card">
-                        <div style="font-size:2rem; margin-bottom:0.75rem;">🧺</div>
-                        <h3>${s.jenisLayanan}</h3>
-                        <div class="price">Rp ${s.hargaPerKg}/kg</div>
-                        <div class="est">⏱ Estimasi: ${s.estimasiWaktu} jam</div>
-                        <div style="margin-top:0.75rem;">
-                            <c:choose>
-                                <c:when test="${s.available}">
-                                    <span class="badge badge-selesai">Tersedia</span>
-                                </c:when>
-                                <c:otherwise>
-                                    <span class="badge badge-cancelled">Tidak Tersedia</span>
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
-                    </div>
-                </c:forEach>
-            </c:otherwise>
-        </c:choose>
+        <%
+            List<ServiceLaundry> services = (List<ServiceLaundry>) request.getAttribute("services");
+            if (services == null || services.isEmpty()) {
+        %>
+            <div class="alert alert-info">Belum ada layanan tersedia.</div>
+        <%
+            } else {
+                for (ServiceLaundry s : services) {
+        %>
+            <div class="service-card">
+                <div style="font-size:2rem; margin-bottom:0.75rem;">🧺</div>
+                <h3><%= s.getJenisLayanan() %></h3>
+                <div class="price">Rp <%= s.getHargaPerKg() %>/kg</div>
+                <div class="est">⏱ Estimasi: <%= s.getEstimasiWaktu() %> jam</div>
+                <div style="margin-top:0.75rem;">
+                    <%
+                        if (s.isAvailable()) {
+                    %>
+                        <span class="badge badge-selesai">Tersedia</span>
+                    <%
+                        } else {
+                    %>
+                        <span class="badge badge-cancelled">Tidak Tersedia</span>
+                    <%
+                        }
+                    %>
+                </div>
+            </div>
+        <%
+                }
+            }
+        %>
     </div>
 
     <%-- Form Tambah Service (Admin Only) --%>
     <%
-        model.Akun akunSvc = (model.Akun) session.getAttribute("akunLogin");
+        Akun akunSvc = (Akun) session.getAttribute("akunLogin");
     %>
 
     <div class="card" style="max-width:480px;">
         <h3 style="margin-bottom:1.25rem; font-size:1.05rem;">Tambah Layanan Baru</h3>
-        <form action="${pageContext.request.contextPath}/service" method="post">
+        <form action="<%= request.getContextPath() %>/service" method="post">
 
             <div class="form-group">
                 <label for="jenisLayanan">Jenis Layanan</label>

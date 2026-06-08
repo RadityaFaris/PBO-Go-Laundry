@@ -1,12 +1,13 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page import="model.ServiceLaundry" %>
+<%@ page import="java.util.List" %>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buat Order - Go-Laundry</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/style.css">
 </head>
 <body>
 
@@ -18,26 +19,34 @@
             <h2>Buat Order Baru</h2>
             <p>Pilih layanan dan masukkan berat laundry</p>
         </div>
-        <a href="${pageContext.request.contextPath}/dashboard" class="btn btn-outline" style="width:auto;">
+        <a href="<%= request.getContextPath() %>/dashboard" class="btn btn-outline" style="width:auto;">
             ← Kembali
         </a>
     </div>
 
     <div style="display:grid; grid-template-columns: 1fr 360px; gap:1.5rem; align-items:start;">
 
-        <%-- Pilih Layanan --%>
+        <%-- Pilih Layanan tanpa JSTL --%>
         <div class="card">
             <h3 style="margin-bottom:1.25rem; font-size:1.05rem;">Pilih Layanan</h3>
             <div class="service-grid">
-                <c:forEach var="s" items="${services}">
-                    <div class="service-card" onclick="pilihService('${s.id}', '${s.jenisLayanan}', ${s.hargaPerKg})"
-                         id="card-${s.id}">
+                <%
+                    List<ServiceLaundry> services = (List<ServiceLaundry>) request.getAttribute("services");
+                    if (services != null) {
+                        for (ServiceLaundry s : services) {
+                %>
+                    <div class="service-card" 
+                         onclick="pilihService('<%= s.getId() %>', '<%= s.getJenisLayanan() %>', <%= s.getHargaPerKg() %>)"
+                         id="card-<%= s.getId() %>">
                         <div style="font-size:1.6rem; margin-bottom:0.5rem;">🧺</div>
-                        <h3>${s.jenisLayanan}</h3>
-                        <div class="price">Rp <c:out value="${s.hargaPerKg}"/>/kg</div>
-                        <div class="est">⏱ Estimasi: ${s.estimasiWaktu} jam</div>
+                        <h3><%= s.getJenisLayanan() %></h3>
+                        <div class="price">Rp <%= s.getHargaPerKg() %>/kg</div>
+                        <div class="est">⏱ Estimasi: <%= s.getEstimasiWaktu() %> jam</div>
                     </div>
-                </c:forEach>
+                <%
+                        }
+                    }
+                %>
             </div>
         </div>
 
@@ -45,7 +54,7 @@
         <div class="card">
             <h3 style="margin-bottom:1.25rem; font-size:1.05rem;">Detail Order</h3>
 
-            <form action="${pageContext.request.contextPath}/order" method="post" id="formOrder">
+            <form action="<%= request.getContextPath() %>/order" method="post" id="formOrder">
                 <input type="hidden" name="serviceId" id="serviceId">
 
                 <div class="form-group">

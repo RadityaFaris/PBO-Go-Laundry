@@ -1,7 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="model.*" %>
 <%@ page import="java.util.List" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page import="java.text.NumberFormat" %>
+<%@ page import="java.util.Locale" %>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -16,23 +17,24 @@
 
 <div class="container">
 
-    <%-- Pesan sukses --%>
-    <c:if test="${param.success == 'order'}">
+    <%-- Pesan sukses tanpa JSTL --%>
+    <%
+        String success = request.getParameter("success");
+        if ("order".equals(success)) {
+    %>
         <div class="alert alert-success">Order berhasil dibuat!</div>
-    </c:if>
-    <c:if test="${param.success == 'payment'}">
+    <% } else if ("payment".equals(success)) { %>
         <div class="alert alert-success">Pembayaran berhasil diproses!</div>
-    </c:if>
-    <c:if test="${param.success == 'review'}">
+    <% } else if ("review".equals(success)) { %>
         <div class="alert alert-success">Review berhasil dikirim!</div>
-    </c:if>
+    <% } %>
 
     <div class="page-header">
         <div>
             <h2>Dashboard</h2>
-            <p>Selamat datang, <strong>${akun.nama}</strong></p>
+            <p>Selamat datang, <strong><%= ((Akun)request.getAttribute("akun")).getNama() %></strong></p>
         </div>
-        <a href="${pageContext.request.contextPath}/order" class="btn btn-primary" style="width:auto;">
+        <a href="<%= request.getContextPath() %>/order" class="btn btn-primary" style="width:auto;">
             + Buat Order
         </a>
     </div>
@@ -81,7 +83,7 @@
         </div>
     </div>
 
-    <%-- Tabel Order --%>
+    <%-- Tabel Order tanpa JSTL --%>
     <div class="card">
         <div class="page-header" style="margin-bottom:1rem;">
             <h2 style="font-size:1.1rem;">Riwayat Order</h2>
@@ -100,39 +102,47 @@
                     </tr>
                 </thead>
                 <tbody>
-                <c:choose>
-                    <c:when test="${empty orders}">
+                <%
+                    if (orders == null || orders.isEmpty()) {
+                %>
                         <tr>
                             <td colspan="6" style="text-align:center; color:#6b7280; padding:2rem;">
-                                Belum ada order. <a href="${pageContext.request.contextPath}/order" class="link">Buat order sekarang</a>
+                                Belum ada order. <a href="<%= request.getContextPath() %>/order" class="link">Buat order sekarang</a>
                             </td>
                         </tr>
-                    </c:when>
-                    <c:otherwise>
-                        <c:forEach var="o" items="${orders}">
+                <%
+                    } else {
+                        NumberFormat nf = NumberFormat.getInstance(new Locale("id", "ID"));
+                        for (Order o : orders) {
+                %>
                             <tr>
-                                <td><strong>${o.orderId}</strong></td>
-                                <td>${o.tanggal}</td>
-                                <td>${o.berat} kg</td>
-                                <td>Rp <fmt:formatNumber value="${o.totalHarga}" pattern="#,###"/></td>
+                                <td><strong><%= o.getOrderId() %></strong></td>
+                                <td><%= o.getTanggal() %></td>
+                                <td><%= o.getBerat() %> kg</td>
+                                <td>Rp <%= nf.format(o.getTotalHarga()) %></td>
                                 <td>
-                                    <span class="badge badge-${o.status.toLowerCase()}">
-                                        ${o.status}
+                                    <span class="badge badge-<%= o.getStatus().toLowerCase() %>">
+                                        <%= o.getStatus() %>
                                     </span>
                                 </td>
                                 <td style="display:flex; gap:0.5rem;">
-                                    <a href="${pageContext.request.contextPath}/order?action=detail&id=${o.orderId}"
+                                    <a href="<%= request.getContextPath() %>/order?action=detail&id=<%= o.getOrderId() %>"
                                        class="btn btn-outline btn-sm">Detail</a>
-                                    <c:if test="${o.status == 'PENDING'}">
-                                        <a href="${pageContext.request.contextPath}/order?action=cancel&id=${o.orderId}"
+                                    <%
+                                        if ("PENDING".equals(o.getStatus())) {
+                                    %>
+                                        <a href="<%= request.getContextPath() %>/order?action=cancel&id=<%= o.getOrderId() %>"
                                            class="btn btn-danger btn-sm"
                                            onclick="return confirm('Batalkan order ini?')">Batal</a>
-                                    </c:if>
+                                    <%
+                                        }
+                                    %>
                                 </td>
                             </tr>
-                        </c:forEach>
-                    </c:otherwise>
-                </c:choose>
+                <%
+                        }
+                    }
+                %>
                 </tbody>
             </table>
         </div>
