@@ -5,9 +5,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBConnection {
-    private static final String URL      = "jdbc:mysql://localhost:3306/golaundry";
-    private static final String USER     = "root";
-    private static final String PASSWORD = "";
+    private static final String URL      = "jdbc:mysql://b9yehf0mgexd9o6intr0-mysql.services.clever-cloud.com:3306/b9yehf0mgexd9o6intr0?useSSL=true&allowPublicKeyRetrieval=true";
+    private static final String USER     = "ufikktoh4fe70ebn";
+    private static final String PASSWORD = "SgLoNwQ4yiXrMLPWODae";
 
     public static Connection getConnection() throws SQLException {
         try {
